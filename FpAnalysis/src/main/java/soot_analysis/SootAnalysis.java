@@ -95,31 +95,32 @@ public class SootAnalysis {
 		features.addMeta("fname",new File(args[2]).getName());
 		features.addMeta("md5", md5);
 		features.addMeta("nclasses", String.valueOf(nclasses));
-		
-//		print("=== KeyGen analysis...");
-//		analyzeKeyGen(features, sc);
-//
-////		print("=== OnAuthenticationSucceeded analysis...");
-////		analyzeOnAuthenticationSucceeded(features, sc);
-//
-//		print("=== AuthenticationRequired analysis...");
-//		analyzeAuthenticationRequired(features, sc);
 
-//		print("=== Authenticate analysis...");
-//		analyzeAuthenticate(features, sc);
 
-//		print("=== Invalidated analysis...");
-//		analyzeInvalidated(features, sc);
+		print("=== KeyGen analysis...");
+		analyzeKeyGen(features, sc);
 
-//		print("=== keycreation analysis...");
-//		analyzeKeyCreation(features, sc);
+//		print("=== OnAuthenticationSucceeded analysis...");
+//		analyzeOnAuthenticationSucceeded(features, sc);
+
+		print("=== AuthenticationRequired analysis...");
+		analyzeAuthenticationRequired(features, sc);
+
+		print("=== Authenticate analysis...");
+		analyzeAuthenticate(features, sc);
+
+		print("=== Invalidated analysis...");
+		analyzeInvalidated(features, sc);
+
+		print("=== keycreation analysis...");
+		analyzeKeyCreation(features, sc);
 
 //		print("=== test onclickAuthenticate...");
 //		TestOnclickAuthenticate(features, sc);
-//        TestOnclickAuthenticate_dfs(features, sc);
+        TestOnclickAuthenticate_dfs(features, sc);
 
-//		print("=== Unlock analysis...");
-//		analyzeUnlock(features, sc);
+		print("=== Unlock analysis...");
+		analyzeUnlock(features, sc);
 
         print("=== analyzeCaller...");
         analyzeCaller(features, sc, pname);
@@ -1023,7 +1024,7 @@ public class SootAnalysis {
 		}
 	}
 
-	private static boolean handleIntFlag(SootContext SC, CodeLocation cl, Value sv, int targetFlag, String matchType){
+	public static boolean handleIntFlag(SootContext SC, CodeLocation cl, Value sv, int targetFlag, String matchType){
 		int finalValue;
 		String valueString = sv.toString();
 		
@@ -1134,7 +1135,7 @@ public class SootAnalysis {
 		return false;
 	}
 	
-	private static Value getInvokeParameter(SootContext SC, Unit uu, int argIndex){
+	public static Value getInvokeParameter(SootContext SC, Unit uu, int argIndex){
 		// 0 is the first arg and NOT "this"
 //		print("*** getInvokeParameter", SC.getInvokeExpr(uu));
 		return SC.getInvokeExpr(uu).getArgs().get(argIndex);
@@ -1432,7 +1433,7 @@ public class SootAnalysis {
 		return tstr;
 	}
 	
-	private static boolean isSliceToConstant(Tree<SlicerState> stree) {
+	public static boolean isSliceToConstant(Tree<SlicerState> stree) {
 		SlicerState leaf = null;
 		for(SlicerState ss : stree.getLeaves()){
 			if(! String.valueOf(ss.reg).equals("return")){
@@ -1475,7 +1476,7 @@ public class SootAnalysis {
 //	}
 
 	/* zx   */  // determine whether the key is created as new every time (change-sensitive)
-	private static boolean isNullSliceForAuthenticate(Tree<SlicerState> stree) {
+	public static boolean isNullSliceForAuthenticate(Tree<SlicerState> stree) {
 
 		for(SlicerState ss : stree.getLeaves()){
 			if(stringInList(String.valueOf(ss.reg), Arrays.asList(new String[] {"field", "nullreg"}))){

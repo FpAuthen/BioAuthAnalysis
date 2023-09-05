@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 
 public class Tree<T extends Hashable>{
-	HashMap<String, Node<T>> nodeMap = new HashMap<String, Node<T>>();
+	public HashMap<String, Node<T>> nodeMap = new HashMap<String, Node<T>>();
 	public Node<T> head = new Node<T>(0);
 	
 	public void addHead(Node<T> h){
@@ -26,6 +26,7 @@ public class Tree<T extends Hashable>{
 		}else{
 			b.children.add(newNode);
 			return null;
+//			return newNode;
 		}
 	}
 	

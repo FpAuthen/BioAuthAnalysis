@@ -9,7 +9,7 @@ public class BackwardCallgraph {
 	
 	SootMethod startMethod;
 	SootContext SC;
-	boolean skipLibraries = false;
+	public boolean skipLibraries = false;
 	int maxNNodes = 1000;
 	
 	public BackwardCallgraph(SootContext SC, SootMethod startMethod){

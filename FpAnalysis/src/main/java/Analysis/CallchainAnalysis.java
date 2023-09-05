@@ -63,8 +63,6 @@ public class CallchainAnalysis {
             System.out.println(e.toString());
             return apkpath.substring(apkpath.lastIndexOf('/') + 1, apkpath.length() - 4);
         }
-
-
     }
 
     public static String getActivityName(AXmlNode node) {
@@ -88,7 +86,7 @@ public class CallchainAnalysis {
     }
 
     public static void main(String[] args) throws XmlPullParserException, IOException, ParseException {
-        // arg: apkpath respath
+        // arg: apkpath respath write_boolean
         String apkpath = args[0];
         String respath = args[1];
         CallchainAnalysis callchainAnalysis = new CallchainAnalysis(apkpath, respath);

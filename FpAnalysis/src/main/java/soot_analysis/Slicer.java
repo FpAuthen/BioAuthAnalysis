@@ -21,10 +21,10 @@ public class Slicer {
 	int maxNNodes = 200;
 	
 	boolean skipNews = true;
-	boolean followMethodParams = false;
-	boolean skipThisReg = true;
-	boolean followReturns = false;
-	boolean followFields = false;
+	public boolean followMethodParams = false;
+	public boolean skipThisReg = true;
+	public boolean followReturns = false;
+	public boolean followFields = false;
 	
 	//boolean followInvokeParams = false;
 	

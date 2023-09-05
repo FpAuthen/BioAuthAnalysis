@@ -24,7 +24,7 @@ public class SootContext {
 	
 	private Collection<SootMethod> runnableRunMethods;
 	
-	SootContext(Scene s){
+	public SootContext(Scene s){
 		this.scene = s;
 		ch = new Hierarchy();
 		for(SootClass sc : this.scene.getClasses()){

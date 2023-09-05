@@ -1,5 +1,6 @@
 package soot_analysis;
 
+import scenery.Common;
 import soot.*;
 import soot.jimple.*;
 import soot.toolkits.graph.BriefUnitGraph;
@@ -103,14 +104,13 @@ public class ForwardSlicer {
 			print("QUEUE ###############", String.valueOf(queue));
 			Node<SlicerState> cn = queue.poll();
 			SlicerState sstate_pre = cn.value;
-			Collection<Tuple<Unit, SootMethod>> toExploreUnits;
-			toExploreUnits = new LinkedList<>();
+			Collection<Tuple<Unit, SootMethod>> toExploreUnits = new LinkedList<>();
 			boolean last_return = false;
 
 //			if (sstate_pre.reg.equals("return")) {
 			if (sstate_pre.reg.startsWith("return")) {
 				last_return = true;
-				for (CodeLocation cl : SC.getCallers(sstate_pre.containerMethod)) {
+				for (CodeLocation cl : newGetCallers(SC, sstate_pre.containerMethod)) {
 					toExploreUnits.add(new Tuple(cl.sunit, cl.smethod));
 				}
 			} else {
@@ -145,12 +145,7 @@ public class ForwardSlicer {
 						if (nn != null) {
 							queue.add(nn);
 						}
-//						Collection<CodeLocation> callers = SC.getCallers(tstate.y);
-//						for(CodeLocation cl : callers){
-//							Value vv = cl.sunit.getDefBoxes().get(0).getValue();
-//							Node<SlicerState> nn = tree.addChild(cn, new SlicerState("return", cl.sunit, cl.smethod));
-//							queue.add(nn);
-//						}
+//						queue.add(nn);
 					} else if (target instanceof RetStmt) {        //无返回值 void ---未处理检查结果，不安全
 						print("------ target type: RetStmt, WEAK");
 						nn = tree.addChild(cn, new SlicerState("WEAK", newUnit, tstate.y));
@@ -286,6 +281,32 @@ public class ForwardSlicer {
 		}
 			return tree;
 
+	}
+
+	// 新改的找caller的方式
+	public Collection<CodeLocation> newGetCallers(SootContext SC, SootMethod method) {
+		Collection<CodeLocation> res = new LinkedList<>();
+		if (!Common.CalleeToCallerMap.containsKey(method) || Common.CalleeToCallerMap.get(method).isEmpty())
+			return null;
+		Collection<SootMethod> callers_m = Common.CalleeToCallerMap.get(method);
+		for(SootMethod tm : callers_m){
+			if(tm.hasActiveBody()){
+				Body bb = tm.getActiveBody();
+				for(Unit uu : bb.getUnits()){
+					InvokeExpr ie = SC.getInvokeExpr(uu);
+					if(ie != null){
+						//at least the subsignature must be the same
+						if(ie.getMethod().toString().equals(method.toString())){
+							List<SootMethod> targets = SC.getCallees(ie, tm);
+							if(targets.contains(method)){
+								res.add(new CodeLocation(tm.getDeclaringClass(), tm , uu));
+							}
+						}
+					}
+				}
+			}
+		}
+		return res;
 	}
 
 	public String get_intent_classPara(SootMethod smethod, Stmt target) {
