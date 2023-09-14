@@ -25,18 +25,6 @@ public class ForwardSlicer {
         this.containerMethod = containerMethod;
     }
 
-	Unit startUnit;
-	String startReg;
-	SootMethod containerMethod;
-	SootContext SC;
-	int maxNNodes = 200;
-
-	public ForwardSlicer(SootContext SC, Unit startUnit, String startReg, SootMethod containerMethod){
-		this.SC = SC;
-		this.startUnit = startUnit;
-		this.startReg = startReg;
-		this.containerMethod = containerMethod;
-	}
 
     public Tree<SlicerState> run() {
         return run(maxNNodes);
