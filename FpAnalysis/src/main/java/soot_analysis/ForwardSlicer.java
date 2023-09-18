@@ -85,8 +85,7 @@ public class ForwardSlicer {
         }
 
         return tree;
-	}
-
+    }
 
     /*********************** zx **************************/
     // 追踪hasEnrolledFingerprints返回值
@@ -109,13 +108,21 @@ public class ForwardSlicer {
 //			if (sstate_pre.reg.equals("return")) {
             if (sstate_pre.reg.startsWith("return")) {
                 last_return = true;
-                for (CodeLocation cl : newGetCallers(SC, sstate_pre.containerMethod)) {
-                    toExploreUnits.add(new Tuple(cl.sunit, cl.smethod));
+                Collection<CodeLocation> callers = newGetCallers(SC, sstate_pre.containerMethod);
+                if (callers != null) {
+                    for (CodeLocation cl : callers) {
+                        if (cl != null && cl.sunit != null && cl.smethod != null) {
+                            toExploreUnits.add(new Tuple(cl.sunit, cl.smethod));
+                        }
+                    }
                 }
             } else {
-                for (Unit newUnit : SC.getUseUnits(sstate_pre.reg, sstate_pre.containerMethod)) {
-                    toExploreUnits.add(new Tuple(newUnit, sstate_pre.containerMethod));
-//					break;		//TEST
+                Collection<Unit> useUnits = SC.getUseUnits(sstate_pre.reg, sstate_pre.containerMethod);
+                if (useUnits != null) {
+                    for (Unit newUnit : useUnits) {
+//                    for (Unit newUnit : SC.getUseUnits(sstate_pre.reg, sstate_pre.containerMethod)) {
+                        toExploreUnits.add(new Tuple(newUnit, sstate_pre.containerMethod));
+                    }
                 }
             }
 
@@ -382,7 +389,7 @@ public class ForwardSlicer {
         UnitGraph g = new BriefUnitGraph(body);
 
         Stmt currentStmt = target;
-        Set<Stmt> visitedStmts = new HashSet<>(); // 用于记录已访问的Stmt，较合理的合理的限制死循环
+        Set<Stmt> visitedStmts = new HashSet<>(); // 用于记录已访问的Stmt，较合理的限制死循环
         while (currentStmt != null) {
             // 检查当前Stmt是否已访问过
             if (visitedStmts.contains(currentStmt)) {
