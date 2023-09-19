@@ -394,7 +394,6 @@ public class ForwardSlicer {
         while (currentStmt != null) {
             // 检查当前Stmt是否已访问过
             if (visitedStmts.contains(currentStmt)) {
-                System.out.println("-------get_intent_classPara方法,出现了死循环---------");
                 return "";
             }
             visitedStmts.add(currentStmt);
@@ -421,9 +420,15 @@ public class ForwardSlicer {
                 print(signature);
                 if (signature.contains("android.content.Intent: void <init>")) {
                     // 找到new intent的语句
-                    Value para = invokeExpr.getArgs().get(1);
-                    print("============= new intent:", String.valueOf(para));
-                    return "intent:" + para;
+                    if (invokeExpr.getArgs().size() < 1) {
+                        return "intent:";
+                    } else if (invokeExpr.getArgs().size() < 2) {
+                        return "intent:" + invokeExpr.getArgs().get(0);
+                    } else {
+                        Value para = invokeExpr.getArgs().get(1);
+                        print("============= new intent:", String.valueOf(para));
+                        return "intent:" + para;
+                    }
                 }
 
                 // 判断是否调用authenticate函数
