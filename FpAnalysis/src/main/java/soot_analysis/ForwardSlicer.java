@@ -209,10 +209,11 @@ public class ForwardSlicer {
                     if (suc_intent_res != null) {
                         if (suc_intent_res.equals("return")) {
                             print("---------------- suc_intent_res: return, ");
-                            // 调用API检查的结果作为返回值一部分，找该方法的caller
-                            suc_nnn = tree.addChild(nn, new SlicerState("return_suc", smt, tstate.y));        //addChild如果新加入的节点值已存在，则返回null
-                            print("---------------- suc_nnn: ", String.valueOf(suc_nnn));
-
+                            if (nn != null) {
+                                // 调用API检查的结果作为返回值一部分，找该方法的caller
+                                suc_nnn = tree.addChild(nn, new SlicerState("return_suc", smt, tstate.y));        //addChild如果新加入的节点值已存在，则返回null
+                                print("---------------- suc_nnn: ", String.valueOf(suc_nnn));
+                            }
 //							if (nn != null) {
 //								queue.add(nnn);
 //							}
