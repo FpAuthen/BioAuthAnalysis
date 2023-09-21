@@ -206,17 +206,12 @@ public class ForwardSlicer {
                     //zb:下面部分出现了死循环
                     print("***************** not target");
                     String suc_intent_res = get_intent_classPara(tstate.y, smt);//极有可能是这里出现了问题
-                    if (suc_intent_res != null) {
+                    if (suc_intent_res != null && nn != null) {//nn为空时，addChild操作会有空指针报错风险
                         if (suc_intent_res.equals("return")) {
                             print("---------------- suc_intent_res: return, ");
-                            if (nn != null) {
-                                // 调用API检查的结果作为返回值一部分，找该方法的caller
-                                suc_nnn = tree.addChild(nn, new SlicerState("return_suc", smt, tstate.y));        //addChild如果新加入的节点值已存在，则返回null
-                                print("---------------- suc_nnn: ", String.valueOf(suc_nnn));
-                            }
-//							if (nn != null) {
-//								queue.add(nnn);
-//							}
+                            // 调用API检查的结果作为返回值一部分，找该方法的caller
+                            suc_nnn = tree.addChild(nn, new SlicerState("return_suc", smt, tstate.y));        //addChild如果新加入的节点值已存在，则返回null
+                            print("---------------- suc_nnn: ", String.valueOf(suc_nnn));
                         } else {
                             nnn = tree.addChild(nn, new SlicerState(suc_intent_res, smt, tstate.y));
                         }
