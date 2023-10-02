@@ -25,8 +25,8 @@ public class SootConfig {
         Options.v().ignore_resolution_errors();
         Options.v().set_no_writeout_body_releasing(true);
         Options.v().set_output_dir("./output/FpAnalysis/" + filename + "/");
-//        Options.v().set_output_format(Options.output_format_none);
-        Options.v().set_output_format(Options.output_format_shimple);   //删除所有指纹检测中使用
+        Options.v().set_output_format(Options.output_format_none);
+//        Options.v().set_output_format(Options.output_format_shimple);   //删除所有指纹检测中使用
 //        Options.v().set_output_format(Options.output_format_jimple);
         Options.v().set_whole_program(true);
         Options.v().set_process_multiple_dex(true);

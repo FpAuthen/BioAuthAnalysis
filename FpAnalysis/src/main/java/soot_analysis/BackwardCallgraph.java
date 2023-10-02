@@ -5,6 +5,8 @@ import soot.SootMethod;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import static soot_analysis.Utils.print;
+
 public class BackwardCallgraph {
 	
 	SootMethod startMethod;
@@ -31,9 +33,10 @@ public class BackwardCallgraph {
         queue.add(headNode);
         while (queue.size() > 0 && tree.nodeMap.size() <= nnodes){
             Node<CallgraphState> cn = queue.poll();
-                     
+			print("***[BC: run]***", cn);
             Collection<CodeLocation> callers = new LinkedList<>();
             callers = SC.getCallers(cn.value.method);
+			if(callers == null)	continue;
             for(CodeLocation cl : callers){
 				Node<CallgraphState> nn = tree.addChild(cn, new CallgraphState(cl.smethod, cl.sunit));
 				if(nn!=null){

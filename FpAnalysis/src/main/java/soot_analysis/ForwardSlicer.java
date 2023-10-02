@@ -357,7 +357,8 @@ public class ForwardSlicer {
     public Collection<CodeLocation> newGetCallers(SootContext SC, SootMethod method) {
         Collection<CodeLocation> res = new LinkedList<>();
         if (!Common.CalleeToCallerMap.containsKey(method) || Common.CalleeToCallerMap.get(method).isEmpty())
-            return null;
+//            return null;
+            return res;
         Collection<SootMethod> callers_m = Common.CalleeToCallerMap.get(method);
         for (SootMethod tm : callers_m) {
             if (tm.hasActiveBody()) {
@@ -365,7 +366,6 @@ public class ForwardSlicer {
                 for (Unit uu : bb.getUnits()) {
                     InvokeExpr ie = SC.getInvokeExpr(uu);
                     if (ie != null) {
-                        //at least the subsignature must be the same
                         if (ie.getMethod().toString().equals(method.toString())) {
                             List<SootMethod> targets = SC.getCallees(ie, tm);
                             if (targets.contains(method)) {

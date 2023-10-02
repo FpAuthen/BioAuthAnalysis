@@ -921,7 +921,7 @@ public class SootAnalysis {
 		
 	}
 
-	private static Tree<CallgraphState> intersectTrees(Tree<CallgraphState> ft, Tree<CallgraphState> bt){
+	public static Tree<CallgraphState> intersectTrees(Tree<CallgraphState> ft, Tree<CallgraphState> bt){
 		HashMap<SootMethod, Node<CallgraphState>> ftmap = new HashMap<>();
 		for(Node<CallgraphState> n : ft.nodeMap.values()){
 			SootMethod mm = n.value.method;
@@ -1141,7 +1141,7 @@ public class SootAnalysis {
 		return SC.getInvokeExpr(uu).getArgs().get(argIndex);
 	}
 
-	private static Value getInvokeParameter_resolve(SootContext SC, Unit uu, int argIndex, CodeLocation cl) {
+	public static Value getInvokeParameter_resolve(SootContext SC, Unit uu, int argIndex, CodeLocation cl) {
 		int finalValue;
 		Value sv = SC.getInvokeExpr(uu).getArgs().get(argIndex);
 		print("---[getInvokeParameter_resolve]---sv:", String.valueOf(sv));

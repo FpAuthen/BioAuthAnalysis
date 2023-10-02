@@ -36,6 +36,7 @@ public class ForwardCallgraph {
         LinkedList<Node<CallgraphState>> queue = new LinkedList<Node<CallgraphState>>();
         queue.add(headNode);
         while (queue.size() > 0 && tree.nodeMap.size() <= nnodes){
+			print("***[run]***", "in run: while");
             Node<CallgraphState> cn = queue.poll();
                      
             Collection<Tuple<Unit, SootMethod>> calledMethodsWithUnit = new LinkedList<>();

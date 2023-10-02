@@ -1,5 +1,7 @@
 package soot_analysis;
 
+import ppg.code.Code;
+import scenery.Common;
 import soot.*;
 import soot.jimple.FieldRef;
 import soot.jimple.InstanceInvokeExpr;
@@ -193,46 +195,74 @@ public class SootContext {
 		return res;
 	}
 	
-	public Collection<CodeLocation> getCallers(SootMethod m){
-		HashSet<CodeLocation> res = callers_cache.get(m);
-		if(res!=null){
-			return res;
-		}
-		res = new LinkedHashSet<CodeLocation>();
-		
-		for(SootClass sclass : cm.values()){
-			if(! sclass.isApplicationClass()){
-				continue;
-			}
-			
-			//solving: Exception in thread "main" java.util.ConcurrentModificationException
-			List<SootMethod> copiedMethods = new LinkedList<SootMethod>();
-			for(SootMethod tm : sclass.getMethods()){
-				copiedMethods.add(tm);
-			}
+//	public Collection<CodeLocation> getCallers(SootMethod m){
+//		HashSet<CodeLocation> res = callers_cache.get(m);
+//		if(res!=null){
+//			return res;
+//		}
+//		res = new LinkedHashSet<CodeLocation>();
+//
+//		for(SootClass sclass : cm.values()){
+//			if(! sclass.isApplicationClass()){
+//				continue;
+//			}
+//
+//			//solving: Exception in thread "main" java.util.ConcurrentModificationException
+//			List<SootMethod> copiedMethods = new LinkedList<SootMethod>();
+//			for(SootMethod tm : sclass.getMethods()){
+//				copiedMethods.add(tm);
+//			}
+//
+//			for(SootMethod tm : copiedMethods){
+//				if(tm.hasActiveBody()){
+//					Body bb = tm.getActiveBody();
+//					for(Unit uu : bb.getUnits()){
+//						InvokeExpr ie = getInvokeExpr(uu);
+//						if(ie != null){
+//							//at least the subsignature must be the same
+//							if(ie.getMethod().getSubSignature().equals(m.getSubSignature())){
+//								List<SootMethod> targets = getCallees(ie, tm);
+//								if(targets.contains(m)){
+//									res.add(new CodeLocation(sclass, tm , uu));
+//								}
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
+//
+//		callers_cache.put(m, res);
+//		return res;
+//	}
 
-			for(SootMethod tm : copiedMethods){
-				if(tm.hasActiveBody()){
-					Body bb = tm.getActiveBody();
-					for(Unit uu : bb.getUnits()){
-						InvokeExpr ie = getInvokeExpr(uu);
-						if(ie != null){
-							//at least the subsignature must be the same
-							if(ie.getMethod().getSubSignature().equals(m.getSubSignature())){
-								List<SootMethod> targets = getCallees(ie, tm);
-								if(targets.contains(m)){
-									res.add(new CodeLocation(sclass, tm , uu));
-								}
+	//zx  newGetCallers through constructed callgraph
+	public Collection<CodeLocation> getCallers(SootMethod method) {
+//		Collection<CodeLocation> res = new LinkedList<>();
+		Collection<CodeLocation> res = new LinkedHashSet<CodeLocation>();
+		if (!Common.CalleeToCallerMap.containsKey(method) || Common.CalleeToCallerMap.get(method).isEmpty())
+//			return null;
+			return res;
+		Collection<SootMethod> callers_m = Common.CalleeToCallerMap.get(method);
+		for (SootMethod tm : callers_m) {
+			if (tm.hasActiveBody()) {
+				Body bb = tm.getActiveBody();
+				for (Unit uu : bb.getUnits()) {
+					InvokeExpr ie = getInvokeExpr(uu);
+					if (ie != null) {
+						if (ie.getMethod().toString().equals(method.toString())) {
+							List<SootMethod> targets = getCallees(ie, tm);
+							if (targets.contains(method)) {
+								res.add(new CodeLocation(tm.getDeclaringClass(), tm, uu));
 							}
 						}
 					}
-				}	
+				}
 			}
 		}
-		
-		callers_cache.put(m, res);
 		return res;
 	}
+
 
 	//zx
 	public Collection<CodeLocation> getCallers_precise(SootMethod m){
