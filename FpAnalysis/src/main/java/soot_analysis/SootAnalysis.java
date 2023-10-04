@@ -1024,18 +1024,138 @@ public class SootAnalysis {
 		}
 	}
 
+//	public static boolean handleIntFlag(SootContext SC, CodeLocation cl, Value sv, int targetFlag, String matchType){
+//		int finalValue;
+//		String valueString = sv.toString();
+//
+//		if(targetFlag == 0 & valueString.equals("null")){
+//			if(matchType.equals("equal")){
+//					return true;
+//			}
+//		}
+//		//   **********zx
+//		if(sv.getType().toString().equals("int")){
+//			if(valueString.startsWith("$")){
+//				print("***[SA: handlrIntFlag] $$$cl.smethod ***", cl.smethod.toString());
+//				Unit newUnit = SC.getDefUnit(valueString, cl.smethod, true);
+//				if(newUnit == null){
+//					print("***[SA] handlrIntFlag***", "getDefUnit returns null");
+//				}
+//				String newValue = "";
+//				for(ValueBox vb : newUnit.getUseBoxes()) {
+//					String boxType = vb.getClass().getSimpleName();
+//					InvokeExpr ie = SC.getInvokeExpr(newUnit); //we check this because LinkedRValueBox can be an ie
+//					boolean isNewAssignment = SC.isNewAssignment(newUnit);
+//					if (stringInList(boxType, Arrays.asList((new String[]{"ImmediateBox", "SValueUnitPair", "JimpleLocalBox", "IdentityRefBox"}))) ||
+//							(boxType.equals("LinkedRValueBox") && (ie == null || isNewAssignment))) {
+//						newValue = vb.getValue().toString();
+//						if (newValue.equals("")) {
+//							continue;
+//						} else if (isReg(newValue) || newValue.startsWith("@")) { //LinkedRValueBox contains bad things
+//							//newValue is a reg, we want to find it
+//							break;
+//						}
+//					}
+//				}
+//
+//				int narg = Integer.parseInt(Utils.strExtract(newValue, "@parameter", ": "));
+//
+//				Collection<CodeLocation> callers = SC.getCallers(cl.smethod);
+//				for(CodeLocation caller: callers) {
+//					if(caller != null){
+//						Value vv = SC.getInvokeExpr(caller.sunit).getArg(narg);
+//
+//						// 这里caller调用时设置的参数也可能是临时变量，需要进一步往上找
+//						if(String.valueOf(vv).startsWith("$")) {
+//						}
+//
+//						if(vv.getType().toString().equals("int")) {
+//							print("***[SA: handleIntFlag] vv***", String.valueOf(vv));
+//							finalValue = Integer.parseInt(vv.toString());
+//							print("***[SA: handleIntFlag] finalValue***", finalValue);
+//							if(matchType.equals("and")){
+//								if((finalValue & targetFlag)!=0){
+//									return true;
+//								}
+//							}else if(matchType.equals("equal")){
+//								if(finalValue == targetFlag){
+//									return true;
+//								}
+//							}
+//							return false;
+//						}
+//					}
+//				}
+////				Collection<CodeLocation> callers = SC.getCallers(cl.smethod);
+////				for(CodeLocation caller : callers){
+//////					Value vv = SC.getInvokeExpr(caller.sunit).getArg();
+////					print("***[handleIntFlag]***", caller.toString());
+////				}
+//
+////				Slicer ss = new Slicer(SC, cl.sunit, valueString, cl.smethod);
+////				ss.followMethodParams = true;
+////				print("***[handleIntFlag] ss***", cl.sunit, valueString, cl.smethod);
+////				Tree<SlicerState>  stree = ss.run();
+////				for(SlicerState st : stree.getLeaves()) {
+////					print("***[handleIntFlag] stree***", st.toString());
+////					if (st.unit != null) {
+////						Value vv = getInvokeParameter(SC, st.unit, 0);
+////						print("*** arg: ", vv.toString());
+////					} else {
+////						print("*** st.unit is null");
+////					}
+////				}
+//
+//			}
+//			else {
+//				finalValue = Integer.valueOf(valueString);
+//				if (matchType.equals("and")) {
+//					if ((finalValue & targetFlag) != 0) {
+//						return true;
+//					}
+//				} else if (matchType.equals("equal")) {
+//					if (finalValue == targetFlag) {
+//						return true;
+//					}
+//				}
+//			}
+//		}
+//		//   **********zx END
+//
+////		if(sv.getType().toString().equals("int")){
+////			finalValue = Integer.valueOf(valueString);
+////			if(matchType.equals("and")){
+////				if((finalValue & targetFlag)!=0){
+////					return true;
+////				}
+////			}else if(matchType.equals("equal")){
+////				if(finalValue == targetFlag){
+////					return true;
+////				}
+////			}
+////		}
+////		else if(valueString.startsWith("$")){
+////			Slicer ss = new Slicer(SC, cl.sunit, valueString, cl.smethod);
+////			ss.run();		//zx: do slicing but no judging?? --return false?
+////		}
+//		return false;
+//	}
+
+
+
+	// zx new
 	public static boolean handleIntFlag(SootContext SC, CodeLocation cl, Value sv, int targetFlag, String matchType){
 		int finalValue;
 		String valueString = sv.toString();
-		
+
 		if(targetFlag == 0 & valueString.equals("null")){
 			if(matchType.equals("equal")){
-					return true;
+				return true;
 			}
 		}
 		//   **********zx
 		if(sv.getType().toString().equals("int")){
-			if(valueString.startsWith("$")){
+			while(valueString.startsWith("$")){
 				print("***[SA: handlrIntFlag] $$$cl.smethod ***", cl.smethod.toString());
 				Unit newUnit = SC.getDefUnit(valueString, cl.smethod, true);
 				if(newUnit == null){
@@ -1058,26 +1178,36 @@ public class SootAnalysis {
 					}
 				}
 
+				print("***[SA: handleIntFlag] newValue ***", newValue);
+				print("newValue length:", String.valueOf(newValue.length()), "index0:", newValue.indexOf(0), "isDigit:", String.valueOf(Character.isDigit(newValue.indexOf(0))));
+				if(newValue.length() == 1 && Character.isDigit(newValue.charAt(0))) {
+					print("*** is Digit, break");
+					valueString = newValue;
+					break;
+				}
+
 				int narg = Integer.parseInt(Utils.strExtract(newValue, "@parameter", ": "));
 
 				Collection<CodeLocation> callers = SC.getCallers(cl.smethod);
 				for(CodeLocation caller: callers) {
 					if(caller != null){
 						Value vv = SC.getInvokeExpr(caller.sunit).getArg(narg);
-						if(vv.getType().toString().equals("int")) {
-							finalValue = Integer.parseInt(vv.toString());
-							print("***[SA: handleIntFlag] finalValue***", finalValue);
-							if(matchType.equals("and")){
-								if((finalValue & targetFlag)!=0){
-									return true;
-								}
-							}else if(matchType.equals("equal")){
-								if(finalValue == targetFlag){
-									return true;
-								}
-							}
-							return false;
+						print("vv in caller:", vv.toString());
+
+						// 这里caller调用时设置的参数也可能是临时变量，需要进一步往上找
+						if(String.valueOf(vv).startsWith("$")) {
+							valueString = vv.toString();
+							cl = caller;
+							break;
 						}
+						// 不是临时变量，是数值
+						if(vv.toString().length() == 1 && Character.isDigit(vv.toString().charAt(0))) {
+//							print("*** is Digit, break");
+							valueString = vv.toString();
+							break;
+						}
+						valueString = vv.toString();
+						cl = caller;
 					}
 				}
 //				Collection<CodeLocation> callers = SC.getCallers(cl.smethod);
@@ -1101,21 +1231,17 @@ public class SootAnalysis {
 //				}
 
 			}
-			else {
-				finalValue = Integer.valueOf(valueString);
-				if (matchType.equals("and")) {
-					if ((finalValue & targetFlag) != 0) {
-						return true;
-					}
-				} else if (matchType.equals("equal")) {
-					if (finalValue == targetFlag) {
-						return true;
-					}
-				}
+//			else {
+			finalValue = Integer.parseInt(valueString);
+			if (matchType.equals("and")) {
+				return (finalValue & targetFlag) != 0;
+			} else if (matchType.equals("equal")) {
+				return finalValue == targetFlag;
 			}
+//			}
 		}
 		//   **********zx END
-		
+
 //		if(sv.getType().toString().equals("int")){
 //			finalValue = Integer.valueOf(valueString);
 //			if(matchType.equals("and")){
@@ -1134,7 +1260,8 @@ public class SootAnalysis {
 //		}
 		return false;
 	}
-	
+
+
 	public static Value getInvokeParameter(SootContext SC, Unit uu, int argIndex){
 		// 0 is the first arg and NOT "this"
 //		print("*** getInvokeParameter", SC.getInvokeExpr(uu));

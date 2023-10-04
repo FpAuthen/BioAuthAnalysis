@@ -33,7 +33,7 @@ public class BackwardCallgraph {
         queue.add(headNode);
         while (queue.size() > 0 && tree.nodeMap.size() <= nnodes){
             Node<CallgraphState> cn = queue.poll();
-			print("***[BC: run]***", cn);
+//			print("***[BC: run]***", cn);
             Collection<CodeLocation> callers = new LinkedList<>();
             callers = SC.getCallers(cn.value.method);
 			if(callers == null)	continue;
