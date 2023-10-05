@@ -1285,35 +1285,42 @@ public class SootAnalysis {
 				print("***[SA: handlrIntFlag] $$$cl.smethod ***", cl.smethod.toString());
 				Unit newUnit = SC.getDefUnit(valueString, cl.smethod, true);
 				print("---[getInvokeParameter_resolve]---newUnit:", String.valueOf(newUnit));
+				print("---[getInvokeParameter_resolve]---valueString:", valueString);
 				if (newUnit == null) {
 					print("***[SA] handlrIntFlag***", "getDefUnit returns null");
+					return sv;
 				}
-				String newValue = "";
+				String newValueString = "";
+				Value newValue = null;
 				for (ValueBox vb : newUnit.getUseBoxes()) {
 					String boxType = vb.getClass().getSimpleName();
 					InvokeExpr ie = SC.getInvokeExpr(newUnit); //we check this because LinkedRValueBox can be an ie
 					boolean isNewAssignment = SC.isNewAssignment(newUnit);
 					if (stringInList(boxType, Arrays.asList((new String[]{"ImmediateBox", "SValueUnitPair", "JimpleLocalBox", "IdentityRefBox"}))) ||
 							(boxType.equals("LinkedRValueBox") && (ie == null || isNewAssignment))) {
-						newValue = vb.getValue().toString();
-						print("---[getInvokeParameter_resolve]---newValue:", newValue);
-						if (newValue.equals("")) {
+						newValue = vb.getValue();
+						newValueString = vb.getValue().toString();
+						print("---[getInvokeParameter_resolve]---newValue:", newValueString);
+						if (newValueString.equals("")) {
 							continue;
-						} else if (isReg(newValue) || newValue.startsWith("@")) { //LinkedRValueBox contains bad things
+						} else if (isReg(newValueString) || newValueString.startsWith("@")) { //LinkedRValueBox contains bad things
 							//newValue is a reg, we want to find it
 							break;
 						}
-						if (newValue.equals("1") || newValue.equals("0")) {
+						if (newValueString.equals("1") || newValueString.equals("0")) {
 							return vb.getValue();
 						}
 					}
 				}
 
-				if(newValue.startsWith("$")) {
-					valueString = newValue;
+				if(newValueString.startsWith("$")) {
+					valueString = newValueString;
 					continue;
 				}
-				int narg = Integer.parseInt(Utils.strExtract(newValue, "@parameter", ": "));
+				if(!newValueString.contains("parameter")) {
+					return newValue;
+				}
+				int narg = Integer.parseInt(Utils.strExtract(newValueString, "@parameter", ": "));
 				print("***[SA: getInvokeParameter_resolve] narg:***", String.valueOf(narg));
 
 				Collection<CodeLocation> callers = SC.getCallers(cl.smethod);
