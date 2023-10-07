@@ -419,3 +419,4 @@ com.youku.usercenter.passport.fragment.FingerPrintLoginFragment
 android.app.DialogFragment
 com.alipay.android.app.hardwarepay.base.AbstractHardwarePay
 com.alipay.android.app.hardwarepay.base.IHardwarePay
+com.txmpay.sanyawallet.ui.mine.safe.fragment.FingerValidationFragment

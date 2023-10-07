@@ -18,6 +18,7 @@ import java.util.*;
 
 import static scenery.UserInputApi.AndroidCallbackSet;
 import static scenery.UserInputApi.getCallbackMethodName;
+import static soot_analysis.Utils.print;
 import static util.ApiUtil.isAndroidOrJavaClass;
 
 import com.google.gson.Gson;
@@ -351,8 +352,11 @@ public class Common {
                 //z 加入fragment生命周期建模
                 SootMethod smOnCreateView = sootClass.getMethodUnsafe(LifecycleConstant.FRAGMENT_ONCREATEVIEW);
                 SootMethod smfgOnCreate = sootClass.getMethodUnsafe(LifecycleConstant.ACTIVITY_ONCREATE);
+                SootMethod smfgOnResume = sootClass.getMethodUnsafe(LifecycleConstant.ACTIVITY_ONRESUME);
                 if(smOnCreateView != null && smfgOnCreate != null)
                     addToCallGraph(null, smfgOnCreate, smOnCreateView);
+                if(smfgOnCreate != null && smfgOnResume != null)
+                    addToCallGraph(null, smfgOnCreate,smfgOnResume);
 
             }
             for (SootClass ifaces : sootClass.getInterfaces()) {
