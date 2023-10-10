@@ -50,7 +50,7 @@ public class SecurityAnalysis {
         SecurityAnalysis securityAnalysis = new SecurityAnalysis(apkpath, respath);
 
         boolean write_map = Boolean.parseBoolean(args[2]);
-        SootConfig.init(securityAnalysis.apkPath);
+        SootConfig.init(securityAnalysis.apkPath, "shimple");
         Common.init(write_map);
         ResourceUtil.init(securityAnalysis.apkPath);
         securityAnalysis.run();

@@ -5,4 +5,6 @@ public class Config {
     public static String appPath = "/mnt/iscsi/zzz/huawei_202210/wuba.apk";
 //    public static String androidPlatformPath = "D:\\SDK\\platforms";
     public static String androidPlatformPath = "/home/zzz/BioAuth/static_analysis/android_sdk/";
+
+    public static String format = "jimple";
 }

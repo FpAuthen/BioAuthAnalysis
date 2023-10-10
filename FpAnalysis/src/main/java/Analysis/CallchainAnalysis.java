@@ -92,7 +92,7 @@ public class CallchainAnalysis {
         CallchainAnalysis callchainAnalysis = new CallchainAnalysis(apkpath, respath);
 
         boolean write_map = Boolean.parseBoolean(args[2]);
-        SootConfig.init(callchainAnalysis.apkPath);
+        SootConfig.init(callchainAnalysis.apkPath, "jimple");
         Common.init(write_map);
         ResourceUtil.init(callchainAnalysis.apkPath);
         callchainAnalysis.run();

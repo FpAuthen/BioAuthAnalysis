@@ -51,7 +51,7 @@ public class CryptoCheck {
         CryptoCheck cryptoCheck = new CryptoCheck(apkpath, respath);
 
         boolean write_map = Boolean.parseBoolean(args[2]);
-        SootConfig.init(cryptoCheck.apkPath);
+        SootConfig.init(cryptoCheck.apkPath, "jimple");
         Common.init(write_map);
         ResourceUtil.init(cryptoCheck.apkPath);
         cryptoCheck.run();

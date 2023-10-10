@@ -51,7 +51,7 @@ public class DeactivationAnalysis {
         DeactivationAnalysis deactivationAnalysis = new DeactivationAnalysis(apkpath, respath);
 
         boolean write_map = Boolean.parseBoolean(args[2]);
-        SootConfig.init(deactivationAnalysis.apkPath);
+        SootConfig.init(deactivationAnalysis.apkPath, "jimple");
         Common.init(write_map);
         ResourceUtil.init(deactivationAnalysis.apkPath);
         deactivationAnalysis.run();
@@ -188,6 +188,15 @@ public class DeactivationAnalysis {
             caller_chain.append(String.valueOf(methodDepthPair) + '\n');
 
             visitedMethods.add(method);
+
+            // 百度sdk使用webview实现，开启时验证指纹，关闭时不验证
+            // 特征sdk：关闭时不验证指纹
+            List<String> sdkList = new LinkedList<>(Arrays.asList("com.baidu", "com.tencent", "com.taobao", "com.huawei", "com.meituan", "com.alipay.security"));
+            for(String sdk: sdkList) {
+                if(method.toString().toLowerCase().contains(sdk)) {
+                    return "***SDK:" + method + "***" + caller_chain.toString();
+                }
+            }
 
             // 当调用链中找到 onClick 时，遍历onClick函数体，看是否存在checked相关操作，若有，则是开关组件等处理函数
             // 因为部分app使用checkBox等组件，但是使用onClick处理函数，在其中通过调用isChecked等判断开关状态
