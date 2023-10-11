@@ -10,7 +10,7 @@ public class SlicerState implements Hashable{
 	public Unit unit;
 	public SootMethod containerMethod;
 	
-	SlicerState(String reg, Unit unit, SootMethod containerMethod){
+	public SlicerState(String reg, Unit unit, SootMethod containerMethod){
 		this.reg = reg;
 		this.unit = unit;
 		this.containerMethod = containerMethod;		

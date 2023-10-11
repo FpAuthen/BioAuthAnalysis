@@ -6,8 +6,11 @@ import javafx.util.Pair;
 import org.xmlpull.v1.XmlPullParserException;
 import scenery.Common;
 import soot.*;
-import soot.jimple.Stmt;
+import soot.jimple.*;
 import soot.jimple.infoflow.android.manifest.ProcessManifest;
+import soot.toolkits.graph.ExceptionalUnitGraph;
+import soot.toolkits.graph.UnitGraph;
+import soot.util.Chain;
 import soot_analysis.*;
 
 import java.io.FileWriter;
@@ -51,7 +54,8 @@ public class DeactivationAnalysis {
         DeactivationAnalysis deactivationAnalysis = new DeactivationAnalysis(apkpath, respath);
 
         boolean write_map = Boolean.parseBoolean(args[2]);
-        SootConfig.init(deactivationAnalysis.apkPath, "jimple");
+//        SootConfig.init(deactivationAnalysis.apkPath, "jimple");
+        SootConfig.init(deactivationAnalysis.apkPath, "shimple");
         Common.init(write_map);
         ResourceUtil.init(deactivationAnalysis.apkPath);
         deactivationAnalysis.run();
@@ -152,7 +156,7 @@ public class DeactivationAnalysis {
         String res = null;
         for (SootMethod usage : usages) {
 //            res = dfs(usage, SC, pkg);
-            res = switch_dfs_limitedDepth_semantics(usage, "onCheckedChanged", 100);
+            res = switch_dfs_limitedDepth_semantics(usage, 100);
 
 //            if (res != null) {
             if (res.contains("@@@")) {
@@ -167,7 +171,7 @@ public class DeactivationAnalysis {
     }
 
 
-    private static String switch_dfs_limitedDepth_semantics(SootMethod authenticateUsage, String kw, Integer limitDepth) {
+    private static String switch_dfs_limitedDepth_semantics(SootMethod authenticateUsage, Integer limitDepth) {
         // 创建一个DFS队列
         Deque<Pair<SootMethod, Integer>> dfsStack = new ArrayDeque<>();
         dfsStack.push(new Pair<>(authenticateUsage, 0));
@@ -222,17 +226,111 @@ public class DeactivationAnalysis {
                     continue;
                 }
                 String callerMethod = caller.getSignature();
-                if (callerMethod.contains(kw) || callerMethod.toLowerCase().contains("switch")) {
+                if (callerMethod.toLowerCase().contains("switch")) {
                     // 判断caller的类名前缀是否为"APP"，如果是则停止搜索
                     caller_chain.append(String.valueOf(new Pair<>(callerMethod, depth + 1)) + '\n');
                     return callerMethod + "@@@" + caller_chain;
-                } else {
+                }
+                else if (callerMethod.contains("onCheckedChanged")) {
+                    // 找到onCheckedChanged处理函数时，进一步判断是否只是在开启指纹时调用指纹认证
+                    if(resolve_onCheckedChanged(caller, method)) {
+                        //strong，关闭时也调用了指纹认证
+                        caller_chain.append(String.valueOf(new Pair<>(callerMethod, depth + 1)) + '\n');
+                        return callerMethod + "@@@" + caller_chain;
+                    }
+                    else {
+                        //weak，只在开启时调用了指纹认证
+                        return "***ONLY WHEN ENABLING***" + caller_chain.toString();
+                    }
+                }
+                else {
                     dfsStack.push(new Pair<>(caller, depth + 1));
                 }
             }
         }
 //        return null;
         return caller_chain.toString();
+    }
+
+    private static boolean resolve_onCheckedChanged(SootMethod method, SootMethod callee) {
+        // onCheckedChanged方法，authenticate调用链回溯上onCheckedChanged中调用的方法
+        SootContext SC = new SootContext(Scene.v());
+        // 获取方法的参数列表
+        Value isChecked = method.getActiveBody().getParameterLocal(1);    //idx从0开始
+
+        /**********************/
+        //遍历onCheckedChange方法中的使用
+        Collection<Tuple<Unit, SootMethod>> toExploreUnits = new LinkedList<>();
+        Collection<Unit> useUnits = SC.getUseUnits(isChecked.toString(), method);
+        if (useUnits != null) {
+            for (Unit newUnit : useUnits) {
+//                    for (Unit newUnit : SC.getUseUnits(sstate_pre.reg, sstate_pre.containerMethod)) {
+                toExploreUnits.add(new Tuple(newUnit, method));
+            }
+        }
+        Stmt targetIfStmt = null;
+        for (Tuple<Unit, SootMethod> tstate : toExploreUnits) {
+            print("--- Trace parameter:", String.valueOf(tstate));
+            Unit newUnit = tstate.x;
+            print("*************** useUnit:", String.valueOf(newUnit));
+            Stmt smt = (Stmt) newUnit;
+
+            if (smt instanceof IfStmt) {
+                print("**************** type: IfStmt");            // this
+                targetIfStmt = smt;
+                break;
+            }
+        }
+        // 构建CFG
+        UnitGraph cfg = new ExceptionalUnitGraph(method.retrieveActiveBody());
+
+        Chain<Unit> units = cfg.getBody().getUnits();
+        boolean inIfBranch = false;
+
+        List<Unit> ifBranchStatements = new ArrayList<>();
+        List<Unit> elseBranchStatements = new ArrayList<>();
+
+        for (Unit unit : units) {
+            if (unit instanceof IfStmt) {
+                IfStmt ifStmt = (IfStmt) unit;
+
+                // 获取if语句的条件表达式
+                String condition = ifStmt.toString();
+
+                // 检查是否是目标if语句
+                if (condition.equals(targetIfStmt.toString())) {
+                    inIfBranch = true;
+                } else {
+                    inIfBranch = false;
+                }
+            } else if (inIfBranch) {
+                // 如果在if分支内，记录后续调用的语句
+                ifBranchStatements.add(unit);
+            } else {
+                // 如果在else分支或if语句之前，记录后续调用的语句
+                elseBranchStatements.add(unit);
+            }
+        }
+        if(isAuthenticateInvoked(ifBranchStatements, callee) ^ isAuthenticateInvoked(elseBranchStatements, callee)) {
+            // 一个分支认证了，另一个分支没认证
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isAuthenticateInvoked(List<Unit> unitList, SootMethod targetCallee) {
+        // 判断后续调用authenticate的函数是不是这个分支中的unit调用的
+        for(Unit unit:unitList) {
+            Stmt s = (Stmt) unit;
+            if (s.containsInvokeExpr()) {
+                SootMethod callee = s.getInvokeExpr().getMethodRef().tryResolve();
+                if (callee == null)
+                    continue;
+                if(callee.toString().equals(targetCallee.toString()))
+                    return true;
+            }
+        }
+        return false;
     }
 
 
