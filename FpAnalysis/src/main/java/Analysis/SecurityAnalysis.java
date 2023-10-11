@@ -294,7 +294,7 @@ public class SecurityAnalysis {
                         return true;
                     }
                     if (intent1.contains("authenticate") ^ intent2.contains("authenticate")) {
-                        if (intent1.contains("keyword") || intent1.contains("keyword")) {
+                        if (intent1.contains("keyword") || intent2.contains("keyword")) {
                             continue;
                         }
                         print("WEAK!!!");
