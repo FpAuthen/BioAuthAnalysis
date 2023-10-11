@@ -245,9 +245,9 @@ public class SecurityAnalysis {
 //			Value returnValue = ((Stmt) uu).getInvokeExpr().getUseBoxes().get(0).getValue();
 //            Value returnValue = uu.getDefBoxes().get(0).getValue();//1、获取一个 Unit 对象的第一个定义操作数的值,为什么是第一个操作数字？从开始向下遍历
             List<ValueBox> defBoxes = uu.getDefBoxes();
-            if(defBoxes.size()<1)//过滤掉死代码（调用有返回值的函数，却不对得到的返回值进行进一步的Unit）
+            if (defBoxes.size() < 1)//过滤掉死代码（调用有返回值的函数，却不对得到的返回值进行进一步的Unit）
                 continue;
-            Value returnValue=defBoxes.get(0).getValue();
+            Value returnValue = defBoxes.get(0).getValue();
             print("##################### return Value: ", String.valueOf(returnValue));
 
             //Slicer 可以根据程序的数据依赖关系和控制流信息，将与给定程序点相关的指令和变量提取出来，形成一个被称为切片（Slice）的代码片段。
@@ -294,6 +294,9 @@ public class SecurityAnalysis {
                         return true;
                     }
                     if (intent1.contains("authenticate") ^ intent2.contains("authenticate")) {
+                        if (intent1.contains("keyword") || intent1.contains("keyword")) {
+                            continue;
+                        }
                         print("WEAK!!!");
                         return true;
                     }
@@ -307,9 +310,6 @@ public class SecurityAnalysis {
         print("STRONG!!!");
         return false;
     }
-
-
-
 
 
     private static Tree<CallgraphState> intersectTrees(Tree<CallgraphState> ft, Tree<CallgraphState> bt) {
@@ -376,8 +376,6 @@ public class SecurityAnalysis {
 
         return res;
     }
-
-
 
 
 }

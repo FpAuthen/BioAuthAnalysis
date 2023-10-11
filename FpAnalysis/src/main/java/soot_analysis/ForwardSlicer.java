@@ -407,6 +407,22 @@ public class ForwardSlicer {
             // 判断后继语句是否为new intent语句
             print(String.valueOf(succ.getClass()));
             Stmt stmtsuc = (Stmt) succ;
+
+            //根据语句的keyword处理。（case来自于锦奇健康APP）
+            if (succ.toString().contains("Credential")) {
+
+                InvokeExpr invokeExpr = stmtsuc.getInvokeExpr();
+                Value para = null;
+                if (invokeExpr.getArgs().size() == 1) {
+                    para = invokeExpr.getArgs().get(0);
+                } else if (invokeExpr.getArgs().size() > 1) {
+                    para = invokeExpr.getArgs().get(1);
+                }
+                print("============= keyword:", String.valueOf(para));
+                return "keyword:" + para;
+            }
+
+
             if (stmtsuc instanceof InvokeStmt) {//是否为方法调用Stmt
                 InvokeExpr invokeExpr = ((InvokeStmt) stmtsuc).getInvokeExpr();
 
