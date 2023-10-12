@@ -8,6 +8,7 @@ import soot.toolkits.graph.UnitGraph;
 
 import java.util.*;
 
+import static comm.Common.analyzeDeleteKeywords;
 import static soot_analysis.Utils.print;
 
 public class ForwardSlicer {
@@ -409,17 +410,18 @@ public class ForwardSlicer {
             Stmt stmtsuc = (Stmt) succ;
 
             //根据语句的keyword处理。（case来自于锦奇健康APP）
-            if (succ.toString().contains("Credential")) {
-
-                InvokeExpr invokeExpr = stmtsuc.getInvokeExpr();
-                Value para = null;
-                if (invokeExpr.getArgs().size() == 1) {
-                    para = invokeExpr.getArgs().get(0);
-                } else if (invokeExpr.getArgs().size() > 1) {
-                    para = invokeExpr.getArgs().get(1);
+            for (String analyzeDeleteKeyword : analyzeDeleteKeywords) {
+                if (succ.toString().contains(analyzeDeleteKeyword)) {
+                    InvokeExpr invokeExpr = stmtsuc.getInvokeExpr();
+                    Value para = null;
+                    if (invokeExpr.getArgs().size() == 1) {
+                        para = invokeExpr.getArgs().get(0);
+                    } else if (invokeExpr.getArgs().size() > 1) {
+                        para = invokeExpr.getArgs().get(1);
+                    }
+                    print("============= keyword:", String.valueOf(para));
+                    return "keyword:" + para;
                 }
-                print("============= keyword:", String.valueOf(para));
-                return "keyword:" + para;
             }
 
 

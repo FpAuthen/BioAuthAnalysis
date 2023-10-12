@@ -30,4 +30,8 @@ public class Common {
             "<java.lang.Object: java.lang.Class getClass()>",
             "<java.lang.Class: java.lang.reflect.Method getMethod(java.lang.String,java.lang.Class[])>"
     ));
+
+    public static List<String> analyzeDeleteKeywords = new LinkedList<>(Arrays.asList(
+            "Credential"
+    ));
 }

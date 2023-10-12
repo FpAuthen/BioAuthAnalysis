@@ -38,18 +38,18 @@ public class SootConfig {
         //        Options.v().set_oaat(true);     // false --> PackManager.v().writeOutput();  (下面Mian.main中设置)
 
         if("shimple".equals(format)) {
-            Options.v().set_output_format(Options.output_format_none);
-//            Options.v().set_output_format(Options.output_format_shimple);   //删除所有指纹检测中使用
+//            Options.v().set_output_format(Options.output_format_none);
+            Options.v().set_output_format(Options.output_format_shimple);   //删除所有指纹检测中使用
             // 删除所有指纹检测中，使用shimple开销太大，降低开销
-            Options.v().setPhaseOption("cg", "enabled:false");
-            Options.v().setPhaseOption("jb.dae", "enabled:false");
-            Options.v().setPhaseOption("jb.uce", "enabled:false");
-            Options.v().setPhaseOption("jj.dae", "enabled:false");
-            Options.v().setPhaseOption("jj.uce", "enabled:false");
+//            Options.v().setPhaseOption("cg", "enabled:false");
+//            Options.v().setPhaseOption("jb.dae", "enabled:false");
+//            Options.v().setPhaseOption("jb.uce", "enabled:false");
+//            Options.v().setPhaseOption("jj.dae", "enabled:false");
+//            Options.v().setPhaseOption("jj.uce", "enabled:false");
 
             String[] sootArgs = new String[]{
                     "-pp",
-                    "-via-shimple",
+//                    "-via-shimple",
                     "-android-jars", Config.androidPlatformPath,
                     //projectConfig.apkBaseDir + "android_sdk/platforms"
                     "-process-dir", appPath
